@@ -1,0 +1,31 @@
+#field {
+    background:url(../images/field.jpg) center no-repeat;
+    width: 900px;
+    height: 900px;
+    position: absolute;
+    left: 250px;
+    top: 50px;
+}
+
+.pleb_black {
+    background:url(../images/piece/pleb/black_pleb.png) center no-repeat;
+}
+.pleb_white {
+    background:url(../images/piece/pleb/white_pleb.png) center no-repeat;
+}
+.queen_black {
+    background:url(../images/piece/queen/black_queen.png) center no-repeat;
+}
+.queen_white {
+    background:url(../images/piece/queen/white_queen.png) center no-repeat;
+}
+.draggable, .droppable{
+    transition: width 10s;
+}
+div.square {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+}
+
+
