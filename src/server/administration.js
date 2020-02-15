@@ -1,6 +1,5 @@
 import {COLOR, FIELD_LENGTH, OPPONENT_COLOR, PLAYER_COLOR, RANK, SQUARES, TURN_DELAY} from "../constants";
 import {Square} from "../model/square";
-import {Turn} from "../model/turn";
 import {changeTurn, isOpponentTurn} from "./opponent";
 import {Piece} from "../model/piece";
 import {arePositionsEqual} from "../positioning";

@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import {isOpponentTurn, performMove} from "./src/server/opponent";
 import {findSquareByPosition} from "./src/positioning";
 import {initField} from "./src/server/administration";
-import {SQUARES} from "./src/constants";
+import {PORT, SQUARES} from "./src/constants";
 
 let app = express();
 
@@ -33,15 +33,14 @@ app.post('/turn', jsonParser, function(req, res) {
         return res.sendStatus(400);
     }
 
-    let squareToMove = findSquareByPosition(req.body.from);
-    res.json(squareToMove.moveTo(req.body.to));
+    res.json(findSquareByPosition(req.body.from).moveTo(req.body.to));
 });
 
-app.get('/enemy', jsonParser, function(req, res) {
+app.get('/turn', jsonParser, function(req, res) {
 
     res.json(performMove());
 });
 
-app.listen(3000);
+app.listen(PORT);
 
-console.log("Running at Port 3000");
+console.log(`Running at ${PORT}`);

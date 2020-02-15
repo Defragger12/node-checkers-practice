@@ -1,9 +1,7 @@
 import {parsePosition} from "../positioning";
-import {TURN_DELAY} from "../constants";
+import {BASE_URL, PORT, TURN_DELAY} from "../constants";
 import {drawField, drawSquare, moveSquare} from "./drawmanager";
 import * as axios from "axios";
-import {Square} from "../model/square";
-import {Piece} from "../model/piece";
 
 export async function delay(ms) {
     return await new Promise(resolve => setTimeout(resolve, ms));
@@ -11,7 +9,7 @@ export async function delay(ms) {
 
 export async function performPlayerTurn(prevPosition, moveToPosition) {
     let response = await axios({
-        url: 'http://localhost:3000/turn',
+        url: `${BASE_URL}/turn`,
         method: 'post',
         data: {
             from: parsePosition(prevPosition),
@@ -37,7 +35,7 @@ export async function performEnemyTurns() {
     while (true) {
         await delay(TURN_DELAY);
         let enemyResponse = await axios({
-            url: 'http://localhost:3000/enemy',
+            url: `${BASE_URL}/turn`,
             method: 'get'
         });
 
@@ -66,14 +64,14 @@ async function checkIfGameEnds(response) {
 
 export function resetField() {
     axios({
-        url: 'http://localhost:3000/init',
+        url: `${BASE_URL}/init`,
         method: 'post'
     });
 }
 
 export function getSquares() {
     return axios({
-        url: 'http://localhost:3000/squares',
+        url: `${BASE_URL}/squares`,
         method: 'get',
     })
 }

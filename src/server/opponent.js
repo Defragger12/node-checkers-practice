@@ -1,12 +1,9 @@
 import {isForcedMovePresent, isForcedQueenPresent} from "./administration";
 import * as positioning from "../positioning";
 import {FIELD_LENGTH, OPPONENT_COLOR, PLAYER_COLOR, RANK, SQUARES} from "../constants";
+import {Turn} from "../model/turn";
 
 export let isOpponentTurn = false;
-
-export function setIsOpponentTurn(value) {
-    isOpponentTurn = value;
-}
 
 export function changeTurn() {
     isOpponentTurn = !isOpponentTurn;
@@ -79,11 +76,11 @@ function performBestAvailableMove() {
         }
     }
 
-    // if (suicideMoves.length === 0) {
-    //    administration.applyTurnDelay(administration.askForGameRestart());
-    // } else {
+    if (suicideMoves.length === 0) {
+        return new Turn(null, null, true, false, true);
+    } else {
         return suicideMoves[0].square.moveTo(suicideMoves[0].position);
-    // }
+    }
 }
 
 function performForcedMoveIfNotSuicide(square, suicideMoves) {

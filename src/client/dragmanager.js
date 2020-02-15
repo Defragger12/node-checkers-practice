@@ -40,7 +40,7 @@ const DragManager = new function() {
             dragObject.shiftX = dragObject.downX - coords.left;
             dragObject.shiftY = dragObject.downY - coords.top;
 
-            startDrag(event); // отобразить начало переноса
+            startDrag(event);
         }
 
         dragObject.avatar.style.left = event.pageX - dragObject.shiftX + 'px';
@@ -116,7 +116,7 @@ async function onDragEnd(prevPosition, moveToPosition) {
         return;
     }
 
-    let enemyTurns = await performEnemyTurns();
+    await performEnemyTurns();
 }
 
 function getCoords(elem) {
