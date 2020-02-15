@@ -4,7 +4,8 @@ import bodyParser from "body-parser";
 import {isOpponentTurn, performMove} from "./src/server/opponent";
 import {findSquareByPosition} from "./src/positioning";
 import {initField} from "./src/server/administration";
-import {PORT, SQUARES} from "./src/constants";
+import {PORT, SQUARES, TURN_DELAY} from "./src/constants";
+import socket from 'socket.io';
 
 let app = express();
 
@@ -15,32 +16,40 @@ app.get('/', function(req, res) {
     res.sendFile(path.resolve(__dirname, '/public/index.html'));
 });
 
-app.get('/squares', function(req, res) {
-    res.json(SQUARES);
+const server = app.listen(PORT);
+
+const io = socket(server);
+
+io.on('connection', (socket) => {
+    console.log('SOCKET IS CONNECTED');
+
+    socket.on('draw_field', () => {
+        initField();
+        socket.emit('draw_field', SQUARES);
+    });
+    socket.on('enemy_turns', () => {
+
+        while (true) {
+            let turn = performMove();
+            if (!turn) {
+                break;
+            }
+            if (turn.isGG || turn.isLast) {
+                socket.emit('enemy_turn', turn);
+                break;
+            }
+
+            socket.emit('enemy_turn', turn);
+        }
+    });
+    socket.on('player_turn', ({from, to}) => {
+        socket.emit('player_turn', isOpponentTurn ? null : findSquareByPosition(from).moveTo(to))
+    });
+
+    socket.on('disconnect', function() {
+        console.log("disconnected")
+    });
 });
-
-app.post('/init', function(req, res) {
-    initField();
-});
-
-app.post('/turn', jsonParser, function(req, res) {
-
-    if (isOpponentTurn) {
-        res.json(null);
-    }
-
-    if (!req.body) {
-        return res.sendStatus(400);
-    }
-
-    res.json(findSquareByPosition(req.body.from).moveTo(req.body.to));
-});
-
-app.get('/turn', jsonParser, function(req, res) {
-
-    res.json(performMove());
-});
-
-app.listen(PORT);
 
 console.log(`Running at ${PORT}`);
+

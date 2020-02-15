@@ -1,4 +1,5 @@
-import {delay, performEnemyTurns, performPlayerTurn} from "./requests";
+import {socket} from "./checkers";
+import {parsePosition} from "../positioning";
 
 const RMB_CODE = 1;
 
@@ -111,12 +112,7 @@ const DragManager = new function() {
 
 async function onDragEnd(prevPosition, moveToPosition) {
 
-    let playerTurnResult = await performPlayerTurn(prevPosition, moveToPosition);
-    if (!playerTurnResult) {
-        return;
-    }
-
-    await performEnemyTurns();
+    socket.emit('player_turn', {from: parsePosition(prevPosition), to: parsePosition(moveToPosition)});
 }
 
 function getCoords(elem) {

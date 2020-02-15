@@ -6,14 +6,11 @@ import {
     SQUARES,
     STEP_LENGTH
 } from "../constants";
-import {Square} from "../model/square";
-import {Piece} from "../model/piece";
 import {arePositionsEqual, findDivByPosition, parsePosition} from "../positioning";
-import {getSquares, resetField} from "./requests";
 
 const axios = require("axios");
 
-const FIELD = document.getElementById("field");
+export const FIELD = document.getElementById("field");
 
 export function drawSquare(square) {
 
@@ -54,19 +51,4 @@ export function moveSquare(position1, position2, isRankUp) {
     }
 
     findDivByPosition(position2).className = classNameToMove;
-}
-
-export function drawField() {
-
-    resetField();
-    FIELD.innerHTML = "";
-    getSquares().then(response => {
-        response.data.forEach(square => {
-            drawSquare(new Square(
-                square.position,
-                square.piece ? new Piece(square.piece.color, square.piece.rank) : null
-                )
-            )
-        });
-    });
 }

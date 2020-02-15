@@ -2,7 +2,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
-    target: "node",
     context: path.resolve(__dirname, './src'),
     entry: {
         checkers: ['@babel/polyfill', './client/checkers', './client/dragmanager']
