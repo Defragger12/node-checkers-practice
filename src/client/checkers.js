@@ -13,8 +13,6 @@ socket.emit('draw_field');
 socket.on('enemy_turn', (turn) => {
     moveSquare(turn.from, turn.to, turn.isRankUp);
 
-    delay(TURN_DELAY);
-
     if (turn.isGG) {
         if (confirm("GG, go again?")) {
             socket.emit('draw_field');

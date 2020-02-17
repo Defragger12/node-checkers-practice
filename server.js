@@ -28,18 +28,17 @@ io.on('connection', (socket) => {
         socket.emit('draw_field', SQUARES);
     });
     socket.on('enemy_turns', () => {
-
         while (true) {
             let turn = performMove();
             if (!turn) {
                 break;
             }
-            if (turn.isGG || turn.isLast) {
-                socket.emit('enemy_turn', turn);
-                break;
-            }
 
             socket.emit('enemy_turn', turn);
+
+            if (turn.isGG || turn.isLast) {
+                break;
+            }
         }
     });
     socket.on('player_turn', ({from, to}) => {
