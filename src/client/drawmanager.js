@@ -1,14 +1,11 @@
 import {
     FIELD_HORIZONTAL_BORDER_LENGTH,
     FIELD_VERTICAL_BORDER_LENGTH,
-    PLAYER_COLOR,
     RANK,
     SQUARES,
     STEP_LENGTH
 } from "../constants";
 import {arePositionsEqual, findDivByPosition, parsePosition} from "../positioning";
-
-const axios = require("axios");
 
 export const FIELD = document.getElementById("field");
 

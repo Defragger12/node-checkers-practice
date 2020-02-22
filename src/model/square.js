@@ -8,8 +8,8 @@ import {
 import {Turn} from "./turn";
 import {arePositionsEqual, findSquareByPosition, isPositionWithin, isValidPosition} from "../positioning";
 import {Piece} from "./piece";
-import {DIRECTION, FIELD_LENGTH, PLAYER_COLOR, RANK, SQUARES} from "../constants";
-import {isOpponentTurn} from "../server/opponent";
+import {COLOR, DIRECTION, FIELD_LENGTH, RANK, SQUARES} from "../constants";
+import {colorTurn} from "../server/opponent";
 
 export class Square {
     constructor(position, piece) {
@@ -52,7 +52,7 @@ export class Square {
         this.tempAvailablePositionsToMove = [];
         switch (this.piece.rank) {
             case RANK.PLEB:
-                if (this.piece.color === PLAYER_COLOR) {
+                if (this.piece.color === COLOR.WHITE) {
                     this.searchAvailablePositionsToMove(DIRECTION.TOP_LEFT, 1);
                     this.searchAvailablePositionsToMove(DIRECTION.TOP_RIGHT, 1);
                 } else {
@@ -204,7 +204,7 @@ export class Square {
     }
 
     isFriendly() {
-        return this.piece.color === getCurrentPlayerColor();
+        return this.piece.color === colorTurn;
     }
 
     generateDivClass() {
@@ -212,6 +212,6 @@ export class Square {
     }
 
     ableToRankUp() {
-        return isOpponentTurn ? this.position[1] === FIELD_LENGTH : this.position[1] === 1;
+        return colorTurn === COLOR.BLACK ? this.position[1] === FIELD_LENGTH : this.position[1] === 1;
     }
 }

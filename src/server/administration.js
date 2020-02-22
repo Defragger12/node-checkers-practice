@@ -1,8 +1,8 @@
-import {COLOR, FIELD_LENGTH, OPPONENT_COLOR, PLAYER_COLOR, RANK, SQUARES, TURN_DELAY} from "../constants";
+import {COLOR, FIELD_LENGTH, RANK, SQUARES, TURN_DELAY} from "../constants";
 import {Square} from "../model/square";
-import {changeTurn, isOpponentTurn} from "./opponent";
 import {Piece} from "../model/piece";
 import {arePositionsEqual} from "../positioning";
+import {switchColor} from "./opponent";
 
 export let isForcedMovePresent;
 export let isForcedQueenPresent;
@@ -41,10 +41,6 @@ export function initSquares() {
     }
 }
 
-function initDBSquares() {
-    Square.findWhere()
-}
-
 export function gameFinishedCheck() {
     let noMovesAvailable = true;
     let noPiecesPresent = true;
@@ -64,7 +60,7 @@ export function switchTurn() {
     clearTempMoves();
     positionsNotAllowedToBeatThrough.length = 0;
 
-    changeTurn();
+    switchColor();
 
     populateForcedMoves();
 
@@ -113,8 +109,4 @@ export function populateForcedMoves(specificSquare) {
             }
         });
     }
-}
-
-export function getCurrentPlayerColor() {
-    return isOpponentTurn ? OPPONENT_COLOR : PLAYER_COLOR;
 }

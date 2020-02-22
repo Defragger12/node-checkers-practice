@@ -22,8 +22,9 @@ socket.on('enemy_turn', (turn) => {
 
 socket.on('player_turn', (turn) => {
 
+    // in case we try to move during opponent turn, turn is null
     if (!turn) {
-        socket.emit("enemy_turns");
+        // socket.emit("enemy_turns");
         return;
     }
 
@@ -35,8 +36,10 @@ socket.on('player_turn', (turn) => {
         }
     }
 
+    // vs opponent required
     if (turn.isLast) {
-        socket.emit("enemy_turns");
+
+    //     socket.emit("enemy_turns");
     }
 });
 

@@ -1,16 +1,17 @@
-import {isForcedMovePresent, isForcedQueenPresent} from "./administration";
+import {isForcedMovePresent, isForcedQueenPresent, switchTurn} from "./administration";
 import * as positioning from "../positioning";
-import {FIELD_LENGTH, OPPONENT_COLOR, PLAYER_COLOR, RANK, SQUARES} from "../constants";
+import {COLOR, FIELD_LENGTH, RANK, SQUARES} from "../constants";
 import {Turn} from "../model/turn";
+import {OPPONENT_COLOR, PLAYER_COLOR} from "../client/constants";
 
-export let isOpponentTurn = false;
+export let colorTurn = COLOR.WHITE;
 
-export function changeTurn() {
-    isOpponentTurn = !isOpponentTurn;
+export function switchColor() {
+    colorTurn = (colorTurn === COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE;
 }
 
 export function performMove() {
-    if (!isOpponentTurn) {
+    if (colorTurn !== COLOR.BLACK) {
         return null;
     }
     if (isForcedMovePresent) {
@@ -142,7 +143,7 @@ function countPlayerForcedMoves() {
 
     let forcedMovesCount = 0;
 
-    isOpponentTurn = false;
+    switchColor();
 
     SQUARES.forEach(square => {
         if (!square.isEmpty() && square.piece.color === PLAYER_COLOR) {
@@ -151,7 +152,7 @@ function countPlayerForcedMoves() {
         }
     });
 
-    isOpponentTurn = true;
+    switchColor();
 
     return forcedMovesCount;
 }

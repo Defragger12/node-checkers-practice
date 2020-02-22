@@ -19,9 +19,6 @@ export const DIRECTION = {
 
 export const TURN_DELAY = 200;
 
-export const PLAYER_COLOR = COLOR.WHITE;
-export const OPPONENT_COLOR = COLOR.BLACK;
-
 export const STEP_LENGTH = 101;
 export const FIELD_LENGTH = 8;
 export const FIELD_HORIZONTAL_BORDER_LENGTH = 51;

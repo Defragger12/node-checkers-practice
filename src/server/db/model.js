@@ -6,17 +6,14 @@ const sequelize = new Sequelize("checkers", "root", "root", {
     port: 3306
 });
 
-export const Game =  sequelize.define("game", {
-    id: {
-        type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-        allowNull: false
-    }
-});
-
-Game.hasMany(User);
-Game.hasOne(Field, {onDelete: "cascade"});
+// export const Game = sequelize.define("game", {
+//     id: {
+//         type: Sequelize.INTEGER,
+//         autoIncrement: true,
+//         primaryKey: true,
+//         allowNull: false
+//     }
+// });
 
 export const User = sequelize.define("user", {
     id: {
@@ -48,8 +45,6 @@ export const Field = sequelize.define("field", {
     }
 });
 
-Field.hasMany(Square, {onDelete: "cascade"});
-
 export const Square = sequelize.define("square", {
     id: {
         type: Sequelize.INTEGER,
@@ -59,14 +54,10 @@ export const Square = sequelize.define("square", {
     },
     positionX: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
         allowNull: false
     },
     positionY: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
         allowNull: false
     },
     rank: {
@@ -75,11 +66,9 @@ export const Square = sequelize.define("square", {
     },
     color: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: falseэ
     }
 });
-
-Square.hasOne(Piece, {onDelete: "cascade"});
 
 export const Piece = sequelize.define("piece", {
     id: {
@@ -97,6 +86,13 @@ export const Piece = sequelize.define("piece", {
         allowNull: false
     }
 });
+
+// Game.hasMany(User);
+User.hasOne(Field, {onDelete: "cascade"});
+
+Field.hasMany(Square, {onDelete: "cascade"});
+
+Square.hasOne(Piece, {onDelete: "cascade"});
 
 sequelize.sync().then(result => {
     // console.log(result);

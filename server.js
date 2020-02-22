@@ -1,10 +1,10 @@
 import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
-import {isOpponentTurn, performMove} from "./src/server/opponent";
+import {colorTurn, performMove} from "./src/server/opponent";
 import {findSquareByPosition} from "./src/positioning";
 import {initField} from "./src/server/administration";
-import {PORT, SQUARES, TURN_DELAY} from "./src/constants";
+import {BASE_URL, COLOR, PORT, SQUARES, TURN_DELAY} from "./src/constants";
 import socket from 'socket.io';
 import {User} from "./src/server/db/model";
 import passport from "passport";
@@ -27,6 +27,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+let playersInGame = 0;
 
 app.get('/checkers', (req, res) => {
     // console.log(req.user.isAuthenticated());
@@ -35,6 +36,11 @@ app.get('/checkers', (req, res) => {
 });
 
 app.get('/auth', (req, res) => res.sendFile(path.join(__dirname, '/public/auth.html')));
+
+app.get('/playercount', (req, res) => res.json(playersInGame));
+
+app.get('/player_color', (req, res) => res.json(playersInGame === 1 ? COLOR.WHITE : COLOR.BLACK));
+app.get('/opponent_color', (req, res) => res.json(playersInGame === 1 ? COLOR.BLACK : COLOR.WHITE));
 
 app.post('/login',
     passport.authenticate('local', {failureRedirect: '/auth'}),
@@ -82,6 +88,7 @@ const io = socket(server);
 
 io.on('connection', (socket) => {
     console.log('SOCKET IS CONNECTED');
+    playersInGame++;
 
     socket.on('draw_field', () => {
         initField();
@@ -101,11 +108,14 @@ io.on('connection', (socket) => {
             }
         }
     });
-    socket.on('player_turn', ({from, to}) => {
-        socket.emit('player_turn', isOpponentTurn ? null : findSquareByPosition(from).moveTo(to))
+    socket.on('player_turn', ({from, to, color}) => {
+        // vs opponent required
+        // socket.emit('player_turn', findSquareByPosition(from).moveTo(to))
+        io.emit('player_turn', color !== colorTurn ? null : findSquareByPosition(from).moveTo(to))
     });
 
     socket.on('disconnect', function () {
+        playersInGame--;
         console.log("disconnected")
     });
 });
