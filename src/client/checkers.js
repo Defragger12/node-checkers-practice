@@ -1,14 +1,17 @@
 import io from 'socket.io-client';
-
-import {BASE_URL, SQUARES, TURN_DELAY} from "../constants";
+import {BASE_URL} from "../constants";
 import {drawSquare, moveSquare} from "./drawmanager";
 import {Square} from "../model/square";
 import {Piece} from "../model/piece";
 import {FIELD} from "./drawmanager";
+import {retrieveFieldForUser} from "./requests";
 
 export const socket = io(BASE_URL);
 
-socket.emit('draw_field');
+retrieveFieldForUser();
+// prepareFieldForUser();
+
+//socket.emit('draw_field');
 
 socket.on('enemy_turn', (turn) => {
     moveSquare(turn.from, turn.to, turn.isRankUp);

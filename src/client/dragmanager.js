@@ -1,6 +1,5 @@
 import {socket} from "./checkers";
 import {parsePosition} from "../positioning";
-import {colorTurn} from "../server/opponent";
 import {PLAYER_COLOR} from "./constants";
 
 const RMB_CODE = 1;

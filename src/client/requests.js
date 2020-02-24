@@ -1,24 +1,38 @@
 import {BASE_URL} from "../constants";
 import axios from "axios";
 
-export async function retrievePlayerColor() {
+export const retrievePlayerColor = async () => {
     let response = await axios({
         url: `${BASE_URL}/player_color`,
         method: 'get'
     });
 
-    console.log("player: " + response.data);
-
     return response.data;
-}
+};
 
-export async function retrieveOpponentColor() {
+export const retrieveOpponentColor = async () => {
     let response = await axios({
         url: `${BASE_URL}/opponent_color`,
         method: 'get'
     });
 
-    console.log("opponent: " + response.data);
+    return response.data;
+};
+
+export const retrieveUserName = async () => {
+    let response = await axios({
+        url: `${BASE_URL}/username`,
+        method: 'get'
+    });
 
     return response.data;
-}
+};
+
+export const retrieveFieldForUser = async () => {
+    let response = await axios({
+        url: `${BASE_URL}/field`,
+        method: 'post'
+    });
+
+    console.log(response);
+};

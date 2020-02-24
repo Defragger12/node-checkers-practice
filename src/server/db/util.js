@@ -1,4 +1,6 @@
 import {User, Square, Field, Piece} from "./model";
+import {DEFAULT_SQUARES} from "../constants";
+import {COLOR} from "../../constants";
 
 export const createUser = (username, password) => {
     return User.create({
@@ -7,39 +9,58 @@ export const createUser = (username, password) => {
     });
 };
 
-export const getGameForUser = (userId) => {
-    let field = User.findOne({where: {id: userId}}).getField();
+export const prepareFieldForUser = async (username) => {
+    let user = await User.findOne({where: {username: username}});
+    let field = await user.getField();
     if (!field) {
-        return null;
+        field = await createField(user);
     }
+
+    let createdField = await Field.findOne(
+        {
+            attributes: ['id', 'currentTurnColor'],
+            where: {id: field.id},
+
+            include: [
+                {model: Square, attributes: ['id', 'positionX', 'positionY'],
+                    include: [{model: Piece, attributes: ['color', 'rank']}]},
+                {model: User, attributes: ['username']}
+            ]
+        }
+    );
+
+    return createdField;
 };
 
-export const createGame = (userIds, squares) => {
+export const addUserToField = async (userId, field) => {
 
-    let user1 = User.findOne({where: {id: userIds[0]}});
-    let user2 = User.findOne({where: {id: userIds[1]}});
-
-    Field.create().then(field => {
-        field.addUser(user1);
-        field.addUser(user2);
-        Field.create().then(field => {
-            for (let square in squares) {
-                let squareToCreate = {positionX: square.position[0], positionY: square.position[1], fieldId: field.id};
-                Square.create(squareToCreate).then(createdSquare => {
-                    if (square.piece) {
-                        let pieceToCreate = {
-                            rank: square.piece.rank,
-                            color: square.piece.color,
-                            squareId: createdSquare.id
-                        };
-                        Piece.create(pieceToCreate);
-                    }
-                });
-            }
-        })
-    });
+    let user = await User.findOne({where: {id: userId}});
+    field.addUser(user);
 };
 
-function initDBSquares() {
-    Square.findWhere()
-}
+export const createField = async (user) => {
+
+    let field = await Field.create({currentTurnColor: COLOR.WHITE});
+
+    field.addUser(user);
+    for (let square of DEFAULT_SQUARES) {
+        let squareToCreate = {
+            positionX: square.position[0],
+            positionY: square.position[1],
+            fieldId: field.id
+        };
+        let createdSquare = await Square.create(squareToCreate);
+        if (square.piece) {
+            let pieceToCreate = {
+                rank: square.piece.rank,
+                color: square.piece.color,
+                squareId: createdSquare.id
+            };
+            Piece.create(pieceToCreate);
+        }
+    }
+
+    return field
+};
+
+

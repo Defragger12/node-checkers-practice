@@ -1,19 +1,11 @@
-const Sequelize = require("sequelize");
+import Sequelize from "sequelize";
 
 const sequelize = new Sequelize("checkers", "root", "root", {
     dialect: "mysql",
     host: "localhost",
-    port: 3306
+    port: 3306,
+    logging: false
 });
-
-// export const Game = sequelize.define("game", {
-//     id: {
-//         type: Sequelize.INTEGER,
-//         autoIncrement: true,
-//         primaryKey: true,
-//         allowNull: false
-//     }
-// });
 
 export const User = sequelize.define("user", {
     id: {
@@ -24,7 +16,8 @@ export const User = sequelize.define("user", {
     },
     username: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     password: {
         type: Sequelize.STRING,
@@ -39,7 +32,7 @@ export const Field = sequelize.define("field", {
         primaryKey: true,
         allowNull: false
     },
-    currentTurn: {
+    currentTurnColor: {
         type: Sequelize.STRING,
         allowNull: false
     }
@@ -59,14 +52,6 @@ export const Square = sequelize.define("square", {
     positionY: {
         type: Sequelize.INTEGER,
         allowNull: false
-    },
-    rank: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    color: {
-        type: Sequelize.STRING,
-        allowNull: falseэ
     }
 });
 
@@ -87,12 +72,12 @@ export const Piece = sequelize.define("piece", {
     }
 });
 
-// Game.hasMany(User);
-User.hasOne(Field, {onDelete: "cascade"});
+Field.hasMany(User);
+User.belongsTo(Field);
 
 Field.hasMany(Square, {onDelete: "cascade"});
 
-Square.hasOne(Piece, {onDelete: "cascade"});
+Square.hasMany(Piece, {onDelete: "cascade"});
 
 sequelize.sync().then(result => {
     // console.log(result);

@@ -5,3 +5,4 @@ retrieveOpponentColor().then(color => OPPONENT_COLOR = color);
 
 export let PLAYER_COLOR;
 export let OPPONENT_COLOR;
+export let USER_NAME;

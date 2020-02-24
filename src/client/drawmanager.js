@@ -2,10 +2,9 @@ import {
     FIELD_HORIZONTAL_BORDER_LENGTH,
     FIELD_VERTICAL_BORDER_LENGTH,
     RANK,
-    SQUARES,
     STEP_LENGTH
 } from "../constants";
-import {arePositionsEqual, findDivByPosition, parsePosition} from "../positioning";
+import {findDivByPosition} from "../positioning";
 
 export const FIELD = document.getElementById("field");
 

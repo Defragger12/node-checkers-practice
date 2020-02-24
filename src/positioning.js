@@ -1,4 +1,4 @@
-import {FIELD_LENGTH, SQUARES} from "./constants";
+import {FIELD_LENGTH} from "./constants";
 
 export function isValidPosition(position) {
     return position[0] <= FIELD_LENGTH || position[0] >= 1 || position[1] <= FIELD_LENGTH || position[1] >= 1
@@ -55,8 +55,8 @@ export function findDivByPosition(position) {
         null
 }
 
-export function findSquareByPosition(position) {
+export function findSquareByPosition(position, squares) {
     return isValidPosition(position) ?
-        SQUARES.find(square => arePositionsEqual(square.position, position)) :
+        squares.find(square => arePositionsEqual(square.position, position)) :
         null
 }

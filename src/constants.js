@@ -24,7 +24,5 @@ export const FIELD_LENGTH = 8;
 export const FIELD_HORIZONTAL_BORDER_LENGTH = 51;
 export const FIELD_VERTICAL_BORDER_LENGTH = 50;
 
-export const SQUARES = [];
-
 export const PORT = 3000;
 export const BASE_URL = `http://localhost:${PORT}`;
