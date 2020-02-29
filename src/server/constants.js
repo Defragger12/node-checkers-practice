@@ -5,8 +5,8 @@ import {arePositionsEqual} from "../positioning";
 
 export let DEFAULT_SQUARES = [];
 
-export const FIELD_TO_USERS = {};
-export const SOCKET_TO_USER = {};
+export const FIELDS = [];
+export const SOCKET_TO_USER = [];
 
 const startingPositions = {
     [COLOR.BLACK]: [[2, 1], [4, 1], [6, 1], [8, 1], [1, 2], [3, 2], [5, 2], [7, 2], [2, 3], [4, 3], [6, 3], [8, 3]],

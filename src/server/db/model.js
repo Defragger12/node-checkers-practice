@@ -22,6 +22,10 @@ export const User = sequelize.define("user", {
     password: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    color: {
+        type:Sequelize.STRING,
+        allowNull: true
     }
 });
 
@@ -77,7 +81,7 @@ User.belongsTo(Field);
 
 Field.hasMany(Square, {onDelete: "cascade"});
 
-Square.hasMany(Piece, {onDelete: "cascade"});
+Square.hasOne(Piece, {onDelete: "cascade"});
 
 sequelize.sync().then(result => {
     // console.log(result);

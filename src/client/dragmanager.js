@@ -1,6 +1,5 @@
 import {socket} from "./checkers";
 import {parsePosition} from "../positioning";
-import {PLAYER_COLOR} from "./constants";
 
 const RMB_CODE = 1;
 
@@ -8,7 +7,7 @@ const DragManager = new function() {
 
     let dragObject = {};
 
-    function onMouseDown(event) {
+    const onMouseDown = (event) => {
 
         if (event.which !== RMB_CODE) return;
 
@@ -21,9 +20,9 @@ const DragManager = new function() {
         dragObject.downY = event.pageY;
 
         return false;
-    }
+    };
 
-    function onMouseMove(event) {
+    const onMouseMove = (event) => {
 
         if (!dragObject.elem) return;
         if (!dragObject.avatar) {
@@ -49,23 +48,23 @@ const DragManager = new function() {
         dragObject.avatar.style.top = event.pageY - dragObject.shiftY + 'px';
 
         return false;
-    }
+    };
 
-    function onMouseUp(e) {
+    const onMouseUp = (e) => {
         if (dragObject.avatar) finishDrag(e);
         dragObject = {};
-    }
+    };
 
-    function finishDrag(e) {
+    const finishDrag = (e) => {
         const dropElem = findDroppable(e);
 
         dragObject.avatar.rollback();
         if (dropElem) {
             onDragEnd(dragObject.elem.dataset.position, dropElem.dataset.position);
         }
-    }
+    };
 
-    function createAvatar(event) {
+    const createAvatar = (event) => {
 
         const avatar = dragObject.elem;
         const old = {
@@ -86,17 +85,17 @@ const DragManager = new function() {
         };
 
         return avatar;
-    }
+    };
 
-    function startDrag(e) {
+    const startDrag = (e) => {
         const avatar = dragObject.avatar;
 
         document.body.appendChild(avatar);
         avatar.style.zIndex = 9999;
         avatar.style.position = 'absolute';
-    }
+    };
 
-    function findDroppable(event) {
+    const findDroppable = (event) => {
         dragObject.avatar.hidden = true;
         const elem = document.elementFromPoint(event.clientX, event.clientY);
         dragObject.avatar.hidden = false;
@@ -104,27 +103,26 @@ const DragManager = new function() {
         if (elem == null) return null;
 
         return elem.closest('.droppable');
-    }
+    };
 
     document.onmousemove = onMouseMove;
     document.onmouseup = onMouseUp;
     document.onmousedown = onMouseDown;
 };
 
-async function onDragEnd(prevPosition, moveToPosition) {
+const onDragEnd = async (prevPosition, moveToPosition) => {
 
     socket.emit('player_turn', {
         from: parsePosition(prevPosition),
-        to: parsePosition(moveToPosition),
-        color: PLAYER_COLOR
+        to: parsePosition(moveToPosition)
     });
-}
+};
 
-function getCoords(elem) {
+const getCoords = (elem) => {
     const box = elem.getBoundingClientRect();
 
     return {
         top: box.top + pageYOffset,
         left: box.left + pageXOffset
     };
-}
+};

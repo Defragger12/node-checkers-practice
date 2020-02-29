@@ -1,17 +1,45 @@
 import io from 'socket.io-client';
 import {BASE_URL} from "../constants";
-import {drawSquare, moveSquare} from "./drawmanager";
-import {Square} from "../model/square";
-import {Piece} from "../model/piece";
-import {FIELD} from "./drawmanager";
-import {retrieveFieldForUser} from "./requests";
+import {addPlayerToList, drawField, moveSquare, removePlayerFromList} from "./drawmanager";
+import {preparePlayerList, retrieveFieldForUser, retrieveUserName} from "./requests";
 
 export const socket = io(BASE_URL);
 
-retrieveFieldForUser();
-// prepareFieldForUser();
+retrieveUserName().then(username => {
+    socket.emit('save_user', username);
+}).catch(err => console.log(err + "3"));
 
-//socket.emit('draw_field');
+retrieveFieldForUser().then(([squares, color]) => {
+    console.log(squares);
+    if (!squares) {
+        return;
+    }
+    drawField(squares, color);
+}).catch(err => console.log(err + "2"));
+
+preparePlayerList().then(playerList => {
+    for (let player of playerList) {
+        addPlayerToList(player);
+    }
+}).catch(err => console.log(err + "1"));
+
+socket.on('game_invite', (username) => {
+    if (confirm(`${username} would like to play against you. Accept invite?`)) {
+        socket.emit('game_accept', username);
+    }
+});
+
+socket.on('game_init', ([squares, color]) => {
+    drawField(squares, color);
+});
+
+socket.on('add_user_to_list', (username) => {
+    addPlayerToList(username)
+});
+
+socket.on('remove_user_from_list', (username) => {
+    removePlayerFromList(username)
+});
 
 socket.on('enemy_turn', (turn) => {
     moveSquare(turn.from, turn.to, turn.isRankUp);
@@ -42,21 +70,8 @@ socket.on('player_turn', (turn) => {
     // vs opponent required
     if (turn.isLast) {
 
-    //     socket.emit("enemy_turns");
+        //     socket.emit("enemy_turns");
     }
-});
-
-socket.on('draw_field', (squares) => {
-
-    FIELD.innerHTML = "";
-
-    squares.forEach(square => {
-        drawSquare(new Square(
-            square.position,
-            square.piece ? new Piece(square.piece.color, square.piece.rank) : null
-            )
-        )
-    });
 });
 
 async function delay(ms) {

@@ -21,7 +21,7 @@ export class Square {
             return null;
         }
 
-        const moveToSquare = findSquareByPosition(position, field.squares);
+        const moveToSquare = findSquareByPosition(position, this.getField().squares);
         let isRankUp = moveToSquare.ableToRankUp();
         moveToSquare.piece = new Piece(this.piece.color, isRankUp ? RANK.QUEEN : this.piece.rank);
 
@@ -29,14 +29,14 @@ export class Square {
 
         if (this.wasLastMoveForced) {
             this.wasLastMoveForced = false;
-            field.populateForcedMoves(moveToSquare);
-            if (!field.isForcedMovePresent) {
-                let gameEnds = field.switchTurn();
+            this.getField().populateForcedMoves(moveToSquare);
+            if (!this.getField().isForcedMovePresent) {
+                let gameEnds = this.getField().switchTurn();
                 return new Turn(this.position, position, true, isRankUp, gameEnds);
             }
             return new Turn(this.position, position, false, isRankUp);
         } else {
-            let gameEnds = field.switchTurn();
+            let gameEnds = this.getField().switchTurn();
             return new Turn(this.position, position, true, isRankUp, gameEnds);
         }
     }
@@ -76,7 +76,7 @@ export class Square {
     }
 
     searchAvailablePositionsToMove(direction, steps) {
-        let squareToCheck = findSquareByPosition(direction(this.position, steps), field.squares);
+        let squareToCheck = findSquareByPosition(direction(this.position, steps), this.getField().squares);
         if (squareToCheck && squareToCheck.isEmpty()) {
             this.tempAvailablePositionsToMove.push(squareToCheck.position);
             return true;
@@ -87,22 +87,22 @@ export class Square {
         let squareToCheck, squareToCheck1, squareToCheck2;
         switch (this.piece.rank) {
             case RANK.PLEB:
-                squareToCheck1 = findSquareByPosition(direction(this.position, 1), field.squares);
+                squareToCheck1 = findSquareByPosition(direction(this.position, 1), this.getField().squares);
                 if (!squareToCheck1 ||
                     squareToCheck1.isEmpty() ||
                     squareToCheck1.isFriendly()
                 ) {
                     return;
                 }
-                squareToCheck2 = findSquareByPosition(direction(this.position, 2), field.squares);
+                squareToCheck2 = findSquareByPosition(direction(this.position, 2), this.getField().squares);
                 if (squareToCheck2 && squareToCheck2.isEmpty()) {
                     this.tempForcedPositionsToMove.push(squareToCheck2.position);
                 }
                 break;
             case RANK.QUEEN:
                 for (let i = 1; i < FIELD_LENGTH; i++) {
-                    squareToCheck = findSquareByPosition(direction(this.position, i), field.squares);
-                    squareToCheck1 = findSquareByPosition(direction(this.position, i + 1), field.squares);
+                    squareToCheck = findSquareByPosition(direction(this.position, i), this.getField().squares);
+                    squareToCheck1 = findSquareByPosition(direction(this.position, i + 1), this.getField().squares);
                     if (!squareToCheck || !squareToCheck1 || (!squareToCheck.isEmpty() && squareToCheck.isFriendly())) {
                         return;
                     }
@@ -110,9 +110,9 @@ export class Square {
                         return;
                     }
                     if (!squareToCheck.isEmpty() && !squareToCheck.isFriendly() && squareToCheck1.isEmpty()) {
-                        for (let i = 0; i < field.positionsNotAllowedToBeatThrough.length; i++) {
+                        for (let i = 0; i < this.getField().positionsNotAllowedToBeatThrough.length; i++) {
                             if (isPositionWithin(
-                                field.positionsNotAllowedToBeatThrough[i],
+                                this.getField().positionsNotAllowedToBeatThrough[i],
                                 this.position,
                                 squareToCheck1.position
                             )) {
@@ -121,7 +121,7 @@ export class Square {
                         }
                         this.tempForcedPositionsToMove.push(squareToCheck1.position);
                         for (let j = i + 2; j < FIELD_LENGTH; j++) {
-                            squareToCheck2 = findSquareByPosition(direction(this.position, j), field.squares);
+                            squareToCheck2 = findSquareByPosition(direction(this.position, j), squares);
                             if (squareToCheck2 && squareToCheck2.isEmpty()) {
                                 this.tempForcedPositionsToMove.push(squareToCheck2.position)
                             } else {
@@ -141,11 +141,11 @@ export class Square {
             return false;
         }
 
-        if (field.isForcedQueenPresent && this.piece.rank !== RANK.QUEEN) {
+        if (this.getField().isForcedQueenPresent && this.piece.rank !== RANK.QUEEN) {
             return false;
         }
 
-        if (field.isForcedMovePresent) {
+        if (this.getField().isForcedMovePresent) {
             let forcedToMoveSquare;
             if (this.tempForcedPositionsToMove) {
                 forcedToMoveSquare = this.tempForcedPositionsToMove.find(availablePosition =>
@@ -179,10 +179,10 @@ export class Square {
 
         let distance = Math.abs(position[0] - this.position[0]);
         for (let i = 0; i < distance; i++) {
-            let squareToBeat = SQUARES.find(square => arePositionsEqual(square.position, [xCoord, yCoord]));
+            let squareToBeat = this.getField().squares.find(square => arePositionsEqual(square.position, [xCoord, yCoord]));
             if (squareToBeat && !squareToBeat.isEmpty()) {
                 if (i >= 1) {
-                    field.positionsNotAllowedToBeatThrough.push(squareToBeat.position);
+                    this.getField().positionsNotAllowedToBeatThrough.push(squareToBeat.position);
                 }
                 squareToBeat.erase();
             }
@@ -196,7 +196,7 @@ export class Square {
     }
 
     isFriendly() {
-        return this.piece.color === field.currentTurnColor;
+        return this.piece.color === this.getField().currentTurnColor;
     }
 
     generateDivClass() {
@@ -204,6 +204,17 @@ export class Square {
     }
 
     ableToRankUp() {
-        return field.currentTurnColor === COLOR.BLACK ? this.position[1] === FIELD_LENGTH : this.position[1] === 1;
+        return this.getField().currentTurnColor === COLOR.BLACK ? this.position[1] === FIELD_LENGTH : this.position[1] === 1;
+    }
+
+    static convertFromDB(square) {
+        let convertedPiece;
+        if (square.piece) {
+            convertedPiece = new Piece(square.piece.color, square.piece.rank);
+            convertedPiece.id = square.piece.id;
+        }
+        let convertedSquare = new Square([square.positionX, square.positionY], convertedPiece);
+        convertedSquare.id = square.id;
+        return convertedSquare;
     }
 }

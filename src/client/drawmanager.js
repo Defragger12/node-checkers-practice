@@ -5,10 +5,14 @@ import {
     STEP_LENGTH
 } from "../constants";
 import {findDivByPosition} from "../positioning";
+import {socket} from "./checkers";
+import {Piece} from "../model/piece";
+import {Square} from "../model/square";
 
 export const FIELD = document.getElementById("field");
+const PLAYER_LIST = document.getElementById("player-list");
 
-export function drawSquare(square) {
+export const drawSquare = (square) => {
 
     const div = document.createElement('div');
     div.className = square.generateDivClass();
@@ -16,9 +20,9 @@ export function drawSquare(square) {
     div.style.top = FIELD_VERTICAL_BORDER_LENGTH + (square.position[1] - 1) * STEP_LENGTH + 'px';
     div.dataset.position = square.position[0] + ',' + square.position[1];
     FIELD.appendChild(div);
-}
+};
 
-function eraseAllPiecesBetween(position1, position2) {
+export const eraseAllPiecesBetween = (position1, position2) => {
     let horizontalDirection = position1[0] < position2[0];
     let verticalDirection = position1[1] > position2[1];
 
@@ -31,14 +35,14 @@ function eraseAllPiecesBetween(position1, position2) {
         horizontalDirection ? xCoord++ : xCoord--;
         verticalDirection ? yCoord-- : yCoord++;
     }
-}
+};
 
-function erase(position) {
+export const erase = (position) => {
     const div = findDivByPosition(position);
     div.className = "square droppable";
-}
+};
 
-export function moveSquare(position1, position2, isRankUp) {
+export const moveSquare = (position1, position2, isRankUp) => {
     let classNameToMove = findDivByPosition(position1).className;
     eraseAllPiecesBetween(position1, position2);
 
@@ -47,4 +51,38 @@ export function moveSquare(position1, position2, isRankUp) {
     }
 
     findDivByPosition(position2).className = classNameToMove;
-}
+};
+
+export const drawField = (squares, playerColor) => {
+    FIELD.innerHTML = "";
+
+    squares.forEach(square => {
+        drawSquare(new Square(
+            square.position,
+            square.piece ? new Piece(square.piece.color, square.piece.rank, playerColor) : null
+            )
+        )
+    });
+};
+
+export const addPlayerToList = (username) => {
+    let existingElement = document.querySelector(`div#player-list > button#${username}`);
+    if (existingElement) {
+        return;
+    }
+    PLAYER_LIST.appendChild(generatePlayerItem(username));
+};
+
+export const removePlayerFromList = (username) => {
+    let elementToRemove = document.querySelector(`div#player-list > button#${username}`);
+    elementToRemove.parentNode.removeChild(elementToRemove);
+};
+
+const generatePlayerItem = (username) => {
+    let playerItem = document.createElement("button");
+    playerItem.className = "list-group-item list-group-item-action";
+    playerItem.onclick = () => socket.emit("game_invite", username);
+    playerItem.id = username;
+    playerItem.appendChild(document.createTextNode(username));
+    return playerItem;
+};

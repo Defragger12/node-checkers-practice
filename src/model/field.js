@@ -1,27 +1,33 @@
 import {COLOR, RANK} from "../constants";
+import {Square} from "./square";
 
 export class Field {
-    constructor(user1, user2, squares, isAgainstAI) {
-        this.user1 = user1;
-        this.user2 = user2;
-        squares.forEach(square => square.field = this);
+
+    constructor(squares, users, currentTurnColor) {
+
+        this.playerColor = null;
+
+        squares.forEach(square => {
+            square.getField = () => this;
+        });
+
+        this.users = users;
         this.squares = squares;
-        this.currentTurnColor = COLOR.WHITE;
-        this.isAgainstAI = isAgainstAI;
+        this.currentTurnColor = currentTurnColor;
+        this.isAgainstAI = false;
         this.isForcedMovePresent = false;
         this.isForcedQueenPresent = false;
-        this.id = null;
         this.positionsNotAllowedToBeatThrough = [];
     }
 
-    gameFinishedCheck = () => {
+    gameFinishedCheck() {
         let noMovesAvailable = true;
         let noPiecesPresent = true;
         for (let i = 0; i < this.squares.length; i++) {
-            if (!this.squares.isEmpty() && this.squares.isFriendly()) {
+            if (!this.squares[i].isEmpty() && this.squares[i].isFriendly()) {
                 noPiecesPresent = false;
-                this.squares.populateAvailablePositionsToMove();
-                if (this.squares.tempAvailablePositionsToMove.length > 0) {
+                this.squares[i].populateAvailablePositionsToMove();
+                if (this.squares[i].tempAvailablePositionsToMove.length > 0) {
                     noMovesAvailable = false;
                 }
             }
@@ -29,16 +35,15 @@ export class Field {
         return (noPiecesPresent || noMovesAvailable) && !this.isForcedMovePresent;
     };
 
-    switchColor = () => {
-        this.currentTurnColor = (this.currentTurnColor === COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE;
+    switchColor() {
+        this.currentTurnColor = (this.currentTurnColor === COLOR.WHITE) ? COLOR.BLACK : COLOR.WHITE
     };
 
-    switchTurn = () => {
+
+    switchTurn() {
         this.clearTempMoves();
         this.positionsNotAllowedToBeatThrough.length = 0;
-
         this.switchColor();
-
         this.populateForcedMoves();
 
         if (this.gameFinishedCheck()) {
@@ -46,7 +51,7 @@ export class Field {
         }
     };
 
-    clearTempMoves = () => {
+    clearTempMoves() {
         this.isForcedMovePresent = false;
         this.isForcedQueenPresent = false;
         this.squares.forEach(square => {
@@ -88,7 +93,24 @@ export class Field {
         }
     };
 
-    initField = () => {
-        this.populateForcedMoves();
+    initField() {
+        this.populateForcedMoves()
+    };
+
+    static convertFromDB(field) {
+
+        if (!field) {
+            return null
+        }
+
+        let convertedField;
+        convertedField = new Field(
+            field.squares.map(square => Square.convertFromDB(square)),
+            field.users,
+            field.currentTurnColor
+        );
+        convertedField.id = field.id;
+
+        return convertedField;
     }
 }

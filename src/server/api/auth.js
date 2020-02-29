@@ -25,7 +25,7 @@ auth.use(passport.initialize());
 auth.use(passport.session());
 
 passport.use(new LocalStrategy(
-    function(username, password, done) {
+    function (username, password, done) {
         User.findOne({where: {username: username}}).then(user => {
             if (!user) {
                 return done(null, false, {message: 'Incorrect username.'});
@@ -38,21 +38,13 @@ passport.use(new LocalStrategy(
     })
 );
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
     done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
+passport.deserializeUser(function (id, done) {
     User.findOne({where: {id: id}}).then(user => done(null, user));
 });
-
-// auth.use((req, res, next) => {
-//     if (req.isAuthenticated() || req.url === '/login' || req.url === '/auth' || req.url === '/register') {
-//         next();
-//     } else {
-//         res.redirect("/auth");
-//     }
-// });
 
 auth.get('/auth', (req, res) => {
     res.render(path.join(__dirname, '../../../public/auth.ejs'), {
@@ -66,20 +58,17 @@ auth.post('/login',
     (req, res) => {}
 );
 
-auth.post('/register', (req, res) => {
-    if (req.body.username && req.body.password) {
-        createUser(req.body.username, req.body.password)
-            .then(
-                result => {
-                    req.flash('success', 'user was created');
-                    res.redirect('/auth');
-                }
-            )
-            .catch(
-                err => {
-                    req.flash('error', 'user with such username alread exists');
-                    res.redirect('/auth');
-                }
-            )
+auth.post('/register', async (req, res) => {
+    if (!(req.body.username && req.body.password)) {
+        return;
     }
+    try {
+        let createdUser = await createUser(req.body.username, req.body.password);
+        req.flash('success', 'user was created');
+    } catch (err) {
+        req.flash('error', 'user with such username already exists');
+    }
+    res.redirect('/auth');
 });
+
+auth.get('/username', (req, res) => res.json(req.user.username));
