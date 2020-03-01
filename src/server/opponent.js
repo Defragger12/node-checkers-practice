@@ -78,7 +78,7 @@
 //     }
 //
 //     if (suicideMoves.length === 0) {
-//         return new Turn(null, null, true, false, true);
+//         return new Turn(null, null, true, false, opponentcolor);
 //     } else {
 //         return suicideMoves[0].square.moveTo(suicideMoves[0].position);
 //     }

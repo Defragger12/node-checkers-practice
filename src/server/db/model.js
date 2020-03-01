@@ -83,8 +83,4 @@ Field.hasMany(Square, {onDelete: "cascade"});
 
 Square.hasOne(Piece, {onDelete: "cascade"});
 
-sequelize.sync().then(result => {
-    // console.log(result);
-}).catch(
-    // err=> console.log(err)
-);
+sequelize.sync();

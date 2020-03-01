@@ -1,27 +1,18 @@
 import io from 'socket.io-client';
 import {BASE_URL} from "../constants";
-import {addPlayerToList, drawField, moveSquare, removePlayerFromList} from "./drawmanager";
-import {preparePlayerList, retrieveFieldForUser, retrieveUserName} from "./requests";
+import {
+    addPlayerToList,
+    drawField,
+    makeFieldInactive,
+    moveSquare,
+    removePlayerFromList,
+    updateIsInGameState, updatePlayerFinder
+} from "./drawmanager";
+import {preparePlayerList, retrieveFieldDataForUser, retrieveUserName} from "./requests";
 
 export const socket = io(BASE_URL);
 
-retrieveUserName().then(username => {
-    socket.emit('save_user', username);
-}).catch(err => console.log(err + "3"));
-
-retrieveFieldForUser().then(([squares, color]) => {
-    console.log(squares);
-    if (!squares) {
-        return;
-    }
-    drawField(squares, color);
-}).catch(err => console.log(err + "2"));
-
-preparePlayerList().then(playerList => {
-    for (let player of playerList) {
-        addPlayerToList(player);
-    }
-}).catch(err => console.log(err + "1"));
+init();
 
 socket.on('game_invite', (username) => {
     if (confirm(`${username} would like to play against you. Accept invite?`)) {
@@ -31,14 +22,31 @@ socket.on('game_invite', (username) => {
 
 socket.on('game_init', ([squares, color]) => {
     drawField(squares, color);
+    updatePlayerFinder(true);
 });
 
-socket.on('add_user_to_list', (username) => {
-    addPlayerToList(username)
+socket.on('update_inGame_state', ([username, state]) => {
+    updateIsInGameState(username, state);
+});
+
+socket.on('add_user_to_list', ([username, isInGame]) => {
+    addPlayerToList(username, isInGame);
 });
 
 socket.on('remove_user_from_list', (username) => {
     removePlayerFromList(username)
+});
+
+socket.on('game_lost', (username) => {
+    alert(`Good game. Player "${username}" won.`);
+    updatePlayerFinder(false);
+    makeFieldInactive();
+});
+
+socket.on('game_won', (username) => {
+    alert('Well played. You won!');
+    updatePlayerFinder(false);
+    makeFieldInactive();
 });
 
 socket.on('enemy_turn', (turn) => {
@@ -74,6 +82,22 @@ socket.on('player_turn', (turn) => {
     }
 });
 
-async function delay(ms) {
-    return await new Promise(resolve => setTimeout(resolve, ms));
+
+async function init() {
+
+    socket.emit('save_user', await retrieveUserName());
+
+    let [squares, color] = await retrieveFieldDataForUser();
+    if (squares) {
+        drawField(squares, color);
+    }
+
+    let playersOnline = await preparePlayerList();
+    for (let player of playersOnline) {
+        addPlayerToList(player.name, player.isInGame);
+    }
 }
+
+const delay = async (ms) => {
+    return await new Promise(resolve => setTimeout(resolve, ms));
+};

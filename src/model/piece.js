@@ -6,8 +6,6 @@ export class Piece {
     }
 
     generateDivClass() {
-        // vs opponent
         return this.rank + "_" + this.color + (this.color === this.playerColor ? " draggable" : "");
-        // return `${this.rank}_${this.color} draggable`;
     }
 }

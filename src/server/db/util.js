@@ -1,8 +1,8 @@
 import {Field, Piece, Square, User} from "./model";
 import {DEFAULT_SQUARES, FIELDS} from "../constants";
-import {COLOR, RANK} from "../../constants";
+import {COLOR} from "../../constants";
 import {Field as ClientField} from "../../model/field";
-import {arePositionsEqual} from "../../positioning";
+import {arePositionsEqual, retrieveCoords, retrieveHowToReachInfo} from "../../positioning";
 
 export const createUser = (username, password) => {
     return User.create({
@@ -79,13 +79,10 @@ export const moveSquare = async (turn, field) => {
 };
 
 const eraseAllPiecesBetween = async (position1, position2, squares) => {
-    let horizontalDirection = position1[0] < position2[0];
-    let verticalDirection = position1[1] > position2[1];
 
-    let xCoord = position1[0];
-    let yCoord = position1[1];
+    let {horizontalDirection, verticalDirection, distance} = retrieveHowToReachInfo(position1, position2);
+    let {xCoord, yCoord} = retrieveCoords(position1);
 
-    let distance = Math.abs(position2[0] - position1[0]);
     for (let i = 0; i < distance; i++) {
         let square = squares.find(square => arePositionsEqual(square.position, [xCoord, yCoord]));
         Piece.destroy({where: {squareId: square.id}});

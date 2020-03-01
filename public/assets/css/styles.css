@@ -27,5 +27,15 @@ div.square {
     width: 90px;
     height: 90px;
 }
+.close-button {
+    font-size: 45px;
+    position: absolute;
+    border: unset;
+    color: white;
+    background-color: unset;
+    z-index: 1000;
+    right: -5px;
+    top: -60px;
+}
 
 

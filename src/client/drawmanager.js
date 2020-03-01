@@ -4,12 +4,12 @@ import {
     RANK,
     STEP_LENGTH
 } from "../constants";
-import {findDivByPosition} from "../positioning";
+import {findDivByPosition, retrieveCoords, retrieveHowToReachInfo} from "../positioning";
 import {socket} from "./checkers";
 import {Piece} from "../model/piece";
 import {Square} from "../model/square";
 
-export const FIELD = document.getElementById("field");
+const FIELD = document.getElementById("field");
 const PLAYER_LIST = document.getElementById("player-list");
 
 export const drawSquare = (square) => {
@@ -23,13 +23,10 @@ export const drawSquare = (square) => {
 };
 
 export const eraseAllPiecesBetween = (position1, position2) => {
-    let horizontalDirection = position1[0] < position2[0];
-    let verticalDirection = position1[1] > position2[1];
 
-    let xCoord = position1[0];
-    let yCoord = position1[1];
+    let {horizontalDirection, verticalDirection, distance} = retrieveHowToReachInfo(position1, position2);
+    let {xCoord, yCoord} = retrieveCoords(position1);
 
-    let distance = Math.abs(position2[0] - position1[0]);
     for (let i = 0; i < distance; i++) {
         erase([xCoord, yCoord]);
         horizontalDirection ? xCoord++ : xCoord--;
@@ -65,24 +62,62 @@ export const drawField = (squares, playerColor) => {
     });
 };
 
-export const addPlayerToList = (username) => {
-    let existingElement = document.querySelector(`div#player-list > button#${username}`);
-    if (existingElement) {
+export const addPlayerToList = (username, isInGame) => {
+    if (findDivWithUser(username)) {
         return;
     }
-    PLAYER_LIST.appendChild(generatePlayerItem(username));
+    PLAYER_LIST.appendChild(generatePlayerItem(username, isInGame));
+    updateIsInGameState(username, isInGame);
 };
 
 export const removePlayerFromList = (username) => {
-    let elementToRemove = document.querySelector(`div#player-list > button#${username}`);
+    let elementToRemove = findDivWithUser(username);
     elementToRemove.parentNode.removeChild(elementToRemove);
 };
 
+export const updateIsInGameState = (username, isInGame) => {
+    let playerDiv = findDivWithUser(username);
+    let updatedBadge = generatePlayerBadge(username, isInGame);
+    if (playerDiv.childNodes[1]) {
+        playerDiv.replaceChild(updatedBadge, playerDiv.childNodes[1]);
+        return;
+    }
+    playerDiv.appendChild(updatedBadge);
+};
+
+export const makeFieldInactive = () => {
+    FIELD.childNodes.forEach(node => node.classList.remove('draggable'));
+};
+
+export const updatePlayerFinder = (isInGame) => {
+    document.getElementById('invite-player-button').disabled = isInGame;
+};
+
 const generatePlayerItem = (username) => {
-    let playerItem = document.createElement("button");
-    playerItem.className = "list-group-item list-group-item-action";
-    playerItem.onclick = () => socket.emit("game_invite", username);
+    let playerItem = document.createElement("div");
+    playerItem.className = "list-group-item";
     playerItem.id = username;
-    playerItem.appendChild(document.createTextNode(username));
+
+    let playerName = document.createElement("strong");
+    playerName.className = "align-middle";
+    playerName.appendChild(document.createTextNode(username));
+    playerItem.appendChild(playerName);
+
     return playerItem;
+};
+
+const generatePlayerBadge = (username, isInGame) => {
+    let playerBadge = document.createElement("span");
+    playerBadge.className = `badge badge-pill float-right p-2 ${isInGame ? "badge-secondary" : "badge-success btn"}`;
+    playerBadge.appendChild(document.createTextNode(isInGame ? "in game" : "send invite"));
+    playerBadge.onclick = () => {
+        if (isInGame) return;
+        socket.emit("game_invite", username);
+    };
+
+    return playerBadge;
+};
+
+const findDivWithUser = (username) => {
+    return document.querySelector(`div#player-list > div#${username}`);
 };

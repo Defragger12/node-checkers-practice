@@ -1,9 +1,9 @@
 export class Turn {
-    constructor(from, to, isLast, isRankUp, isGG) {
+    constructor(from, to, isLast, isRankUp, defeatedColor) {
         this.from = from;
         this.to = to;
         this.isLast = isLast;
         this.isRankUp = isRankUp;
-        this.isGG = isGG;
+        this.defeatedColor = defeatedColor;
     }
 }

@@ -4,9 +4,6 @@ import {Square} from "./square";
 export class Field {
 
     constructor(squares, users, currentTurnColor) {
-
-        this.playerColor = null;
-
         squares.forEach(square => {
             square.getField = () => this;
         });
@@ -14,10 +11,10 @@ export class Field {
         this.users = users;
         this.squares = squares;
         this.currentTurnColor = currentTurnColor;
-        this.isAgainstAI = false;
         this.isForcedMovePresent = false;
         this.isForcedQueenPresent = false;
         this.positionsNotAllowedToBeatThrough = [];
+        this.isAgainstAI = false;
     }
 
     gameFinishedCheck() {
@@ -32,7 +29,7 @@ export class Field {
                 }
             }
         }
-        return (noPiecesPresent || noMovesAvailable) && !this.isForcedMovePresent;
+        return ((noPiecesPresent || noMovesAvailable) && !this.isForcedMovePresent) ? this.currentTurnColor : null;
     };
 
     switchColor() {
@@ -46,9 +43,7 @@ export class Field {
         this.switchColor();
         this.populateForcedMoves();
 
-        if (this.gameFinishedCheck()) {
-            return true;
-        }
+        return this.gameFinishedCheck();
     };
 
     clearTempMoves() {
@@ -91,10 +86,6 @@ export class Field {
                 }
             });
         }
-    };
-
-    initField() {
-        this.populateForcedMoves()
     };
 
     static convertFromDB(field) {

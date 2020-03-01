@@ -31,13 +31,13 @@ export class Square {
             this.wasLastMoveForced = false;
             this.getField().populateForcedMoves(moveToSquare);
             if (!this.getField().isForcedMovePresent) {
-                let gameEnds = this.getField().switchTurn();
-                return new Turn(this.position, position, true, isRankUp, gameEnds);
+                let defeatedColor = this.getField().switchTurn();
+                return new Turn(this.position, position, true, isRankUp, defeatedColor);
             }
             return new Turn(this.position, position, false, isRankUp);
         } else {
-            let gameEnds = this.getField().switchTurn();
-            return new Turn(this.position, position, true, isRankUp, gameEnds);
+            let defeatedColor = this.getField().switchTurn();
+            return new Turn(this.position, position, true, isRankUp, defeatedColor);
         }
     }
 
@@ -121,7 +121,7 @@ export class Square {
                         }
                         this.tempForcedPositionsToMove.push(squareToCheck1.position);
                         for (let j = i + 2; j < FIELD_LENGTH; j++) {
-                            squareToCheck2 = findSquareByPosition(direction(this.position, j), squares);
+                            squareToCheck2 = findSquareByPosition(direction(this.position, j), this.getField().squares);
                             if (squareToCheck2 && squareToCheck2.isEmpty()) {
                                 this.tempForcedPositionsToMove.push(squareToCheck2.position)
                             } else {

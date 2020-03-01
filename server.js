@@ -5,8 +5,9 @@ import {middleware} from "./src/server/api/middleware";
 import {auth} from "./src/server/api/auth";
 import {game} from "./src/server/api/game";
 import socket from "socket.io";
+import {Field} from "./src/server/db/model";
+import {Field as ClientField} from "./src/model/field";
 import {moveSquare, prepareFieldForUsers} from "./src/server/db/util";
-import {Field} from "./src/model/field";
 import {findSquareByPosition} from "./src/positioning";
 
 let app = express();
@@ -38,19 +39,22 @@ io.on('connection', (socket) => {
         let acceptedSocket = SOCKET_TO_USER.find(existingSocket => existingSocket.username === username);
         let invitingSocket = SOCKET_TO_USER.find(existingSocket => existingSocket.socket.id === socket.id);
 
-        let preparedField = await prepareFieldForUsers(invitingSocket.username, username);
-        let parsedField = Field.convertFromDB(preparedField);
+        let parsedField = ClientField.convertFromDB(await prepareFieldForUsers(invitingSocket.username, username));
+
         FIELDS.push(parsedField);
-        /// todo delete existing field for other users if game is in progress + show notification
 
         let createdUsers = parsedField.users;
 
-        socket.emit('game_init',
-            [parsedField.squares, createdUsers.find(user => user.username === invitingSocket.username).color]
-        );
-        acceptedSocket.socket.emit('game_init',
-            [parsedField.squares, createdUsers.find(user => user.username === acceptedSocket.username).color]
-        );
+        socket.emit('game_init', [
+            parsedField.squares,
+            createdUsers.find(user => user.username === invitingSocket.username).color
+        ]);
+        socket.broadcast.emit('update_inGame_state', [invitingSocket.username, true]);
+        acceptedSocket.socket.emit('game_init', [
+            parsedField.squares,
+            createdUsers.find(user => user.username === acceptedSocket.username).color
+        ]);
+        acceptedSocket.socket.broadcast.emit('update_inGame_state', [acceptedSocket.username, true]);
     });
 
     socket.on('save_user', (username) => {
@@ -62,15 +66,14 @@ io.on('connection', (socket) => {
         }
 
         SOCKET_TO_USER.push({socket: socket, username: username});
-        socket.broadcast.emit('add_user_to_list', username);
+        socket.broadcast.emit('add_user_to_list', [username, isUserInGame(username)]);
     });
 
     socket.on('player_turn', async ({from, to}) => {
         // vs opponent required
-        // find related field, perform turn and make changes to db in success case
         // if gameEnds - delete field
 
-        let {player, opponent, field} = retrieveUserRelatedData(socket);
+        let {player, enemy, field} = retrieveUserRelatedData(socket);
 
         if (player.color !== field.currentTurnColor) {
             return;
@@ -79,14 +82,27 @@ io.on('connection', (socket) => {
         let enemySocket = SOCKET_TO_USER.find(element => element.username === enemy.username);
         let turn = findSquareByPosition(from, field.squares).moveTo(to);
 
-        await moveSquare(turn, field);
-        await Field.update({currentTurnColor: field.currentTurnColor});
+        if (!turn) {
+            return;
+        }
 
         if (enemySocket) {
             enemySocket.socket.emit('player_turn', turn);
         }
         socket.emit('player_turn', turn);
 
+        if (!turn.defeatedColor) {
+            await moveSquare(turn, field);
+            await Field.update({currentTurnColor: field.currentTurnColor}, {where: {id: field.id}});
+            return;
+        }
+
+        socket.emit('game_won', player.username);
+        socket.broadcast.emit('update_inGame_state', [player.username, false]);
+        enemySocket.socket.emit('game_lost', player.username);
+        enemySocket.socket.broadcast.emit('update_inGame_state', [enemy.username, false]);
+        FIELDS.splice(FIELDS.indexOf(field), 1);
+        await Field.destroy({where: {id: field.id}});
     });
 
     socket.on('disconnect', () => {
@@ -100,6 +116,10 @@ io.on('connection', (socket) => {
         console.log("disconnected")
     });
 });
+
+export const isUserInGame = (username) => {
+    return FIELDS.find(field => field.users.find(user => user.username === username)) != null
+};
 
 const retrieveUserRelatedData = (socket) => {
     let username = SOCKET_TO_USER.find(element => element.socket.id === socket.id).username;

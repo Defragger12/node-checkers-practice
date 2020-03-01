@@ -10,7 +10,7 @@ export const retrieveUserName = async () => {
     return response.data;
 };
 
-export const retrieveFieldForUser = async () => {
+export const retrieveFieldDataForUser = async () => {
     let response = await axios({
         url: `${BASE_URL}/field`,
         method: 'get'
